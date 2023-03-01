@@ -1,0 +1,23 @@
+name: ml
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - jupyter
+  - jupyterlab
+  # - jupyterlab-git
+  # - graphviz
+  - seaborn
+  - dash
+  - jupyter-dash
+  - numpy
+  - pandas
+  - openpyxl
+  - matplotlib
+  - ipympl
+  - geopandas
+  - statsmodels
+  - scikit-learn
+  - ipywidgets
+  - plotly
