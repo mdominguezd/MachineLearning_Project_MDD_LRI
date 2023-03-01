@@ -6,8 +6,7 @@ dependencies:
   - python
   - jupyter
   - jupyterlab
-  # - jupyterlab-git
-  # - graphviz
+  - graphviz
   - seaborn
   - dash
   - jupyter-dash
