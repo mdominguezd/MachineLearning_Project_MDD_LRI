@@ -1,4 +1,4 @@
-name: ml
+name: machine_learning
 channels:
   - conda-forge
   - defaults
@@ -6,18 +6,30 @@ dependencies:
   - python
   - jupyter
   - jupyterlab
-  # - jupyterlab-git
-  # - graphviz
+  - graphviz
   - seaborn
   - dash
   - jupyter-dash
+  - dash-bootstrap-components
+  - dash-bootstrap-templates
+  - dash-daq
   - numpy
   - pandas
   - openpyxl
   - matplotlib
   - ipympl
   - geopandas
+  - contextily
+  - owslib
+  - shapely
+  - gdal
+  - rasterio
+  - rioxarray
   - statsmodels
   - scikit-learn
   - ipywidgets
   - plotly
+  - flask
+  - nodejs
+  - pip
+  - scrapy
