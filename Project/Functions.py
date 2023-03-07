@@ -39,16 +39,19 @@ def read_data(split = True):
 
 
 
-def fit_regression(model : Union['LR', 'KNN'], X_train: Union[np.array, pd.DataFrame], X_test: Union[np.array, pd.DataFrame], y_train: Union[np.array, pd.DataFrame], y_test: Union[np.array, pd.DataFrame], K = 3):
+def fit_regression(model : Union['LR', 'KNN', 'RFR'], X_train: Union[np.array, pd.DataFrame], X_test: Union[np.array, pd.DataFrame], y_train: Union[np.array, pd.DataFrame], y_test: Union[np.array, pd.DataFrame], K = 3, T = 100, D = None):
     """
         Objective: Fit the regession and predict the results on the test set.
         
         Input:
-            - model: String (LR or KNN) specifying the regression to fit
+            - model: String (LR, KNN or RFR) specifying the regression to fit
             - X_train: predictors of training set
             - X_test: predictors of test set
             - y_train: predicted of training set
             - y_test: predicted of test set
+            - K: parameter for knn regression (default = 3)
+            - T: parameter for number of trees in RF (default = 100)
+            - D: parameter for maximum depth of trees (default = None)
         
         Output:
             - fit_mod: fitted regression model
@@ -69,9 +72,16 @@ def fit_regression(model : Union['LR', 'KNN'], X_train: Union[np.array, pd.DataF
         
         y_pred = fit_mod.predict(X_test)
         
+    elif model == 'RFR':
+        from sklearn.ensemble import RandomForestRegressor
+        
+        fit_mod = RandomForestRegressor(n_estimators = T, max_depth = D).fit(X_train, y_train)
+        
+        y_pred = fit_mod.predict(X_test)
+        
         
     else:
-        raise ValueError("Model needs o be either 'LR' or 'KNN'")
+        raise ValueError("Model needs o be either 'LR', 'KNN' or 'RFR'")
     
     return fit_mod, y_pred
 
@@ -102,22 +112,29 @@ def get_metrics(y_true: Union[np.array, pd.DataFrame], y_pred: Union[np.array, p
     
     return metrics
 
-def get_predicted_GeoJSON(nuts, model : Union['LR', 'KNN'], YEAR = 2012, K = 3):
+def get_error_n_predicted_GeoJSON(nuts, model : Union['LR', 'KNN', 'RFR'], YEAR = 2012, K = 3, T = 100, D = None):
     """
         Objective: Get the predicted crop yields for the netherlands and return them as a JSON file
         
         Input:
-            - y_true: True values of dependent variable (np.array or pd.DataFrame)
-            - y_pred: Predicted values of dependent variable (np.array or pd.DataFrame)
+            - nuts: DataFrame with geometries
+            - model: Regression fitted to the data
+            - Year: Year to be predicted
+            - K: parameter for knn regression (default = 3)
+            - T: parameter for number of trees in RF (default = 100)
+            - D: parameter for maximum depth of trees (default = None)
         
         Output:
-            - json: json file with 
+            - gdf_pred: geodataframe with predictions
+            - gdf_error: geodataframe with errors
     """
     import geopandas as gpd
     
     X, X_, y, y_ = read_data()
     
-    mod, y_p = fit_regression(model, X, X_, y, y_, K)
+    mod, y_p = fit_regression(model, X, X_, y, y_, K, T, D)
+    
+    df_error = pd.DataFrame([y_p - y_], index = ['Error']).T
     
     Tr, Te = read_data(split=False)
     
@@ -130,4 +147,10 @@ def get_predicted_GeoJSON(nuts, model : Union['LR', 'KNN'], YEAR = 2012, K = 3):
         
     DF_nuts2 = pd.merge(nuts, DF, left_on = "NUTS_ID", right_on = "IDREGION")
     
-    return DF_nuts2[DF_nuts2['FYEAR']==YEAR]
+    DF_error = pd.concat([Te, df_error], axis = 1)
+    DF_error = pd.merge(nuts, DF_error, left_on = "NUTS_ID", right_on = "IDREGION")
+    
+    gdf_pred = DF_nuts2[DF_nuts2['FYEAR']==YEAR]
+    gdf_error = DF_error[DF_error['FYEAR']==YEAR]
+    
+    return gdf_pred, gdf_error
