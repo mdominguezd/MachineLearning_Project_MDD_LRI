@@ -19,8 +19,6 @@ dependencies:
   - matplotlib
   - ipympl
   - geopandas
-  - contextily
-  - owslib
   - shapely
   - gdal
   - rasterio
@@ -32,4 +30,3 @@ dependencies:
   - flask
   - nodejs
   - pip
-  - scrapy
