@@ -1,3 +1,7 @@
+# folders
+data/
+yield_data/
+
 # VSCode
 .vscode/*
 !.vscode/settings.json
