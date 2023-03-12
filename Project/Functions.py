@@ -14,6 +14,8 @@ import numpy as np
 from scipy.signal import convolve2d
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics.pairwise import pairwise_distances
+import os
 
 def read_data(split = True):
     """
@@ -440,24 +442,25 @@ def read_data_clu():
     regions = np.array(regions)
     country_codes = np.array(country_codes)
     
+    data_cities = np.apply_along_axis(lambda x : (x - np.mean(x))/np.std(x), 0, data_cities)
     
-    return 
+    return data_cities, regions, feature_names
 
-def my_kmeans(data, K=4, maxiter=10, do_plot=False):
+def my_kmeans(data, K=4, maxiter=10):
     """
         Objective: Function to perform K-means clustering in a np.array dataset.
         Inputs: 
             - data: np.arrray with the data to clusterize
             - K: number of clusters to create
             - maxiter: Iterations to perform
-            - do_plot: boolean to 
     """
+    seed = 123
+    np.random.seed(seed)
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
     ## TODO: Choose K data points as initial cluster centroids
     random_indeces = random.sample(range(len(data)),K)
     cluster_centroids = data[random_indeces]
-    
-    if do_plot:
-        plt.figure(figsize = (25,3))
     
     ## Loop over iterations
     for iter in range(maxiter):
@@ -471,15 +474,5 @@ def my_kmeans(data, K=4, maxiter=10, do_plot=False):
         ## TODO: Update the centroids
         for i in range(K):
             cluster_centroids[i,:] = np.mean(data[cluster_assignments == i], axis = 0)
-
-        ## Optionally, plot the data and assignments. Only for 2D data.
-        if do_plot:
-            plt.subplot(1, maxiter, iter+1)
-            plt.scatter(norm_data[:,0], norm_data[:,1], c = cluster_assignments)
-            plt.scatter(cluster_centroids[:,0], cluster_centroids[:,1], marker = 'X', s = 70, c = 'r')
-            plt.xlabel('Variable 0')
-            plt.ylabel('Variable 1')
-            plt.title('K-means iteration ' + str(iter+1))
-            plt.tight_layout()
             
     return cluster_assignments, cluster_centroids
